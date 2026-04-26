@@ -1823,8 +1823,12 @@ html, body {
     max-width: none;
   }
 
-  /* Remove extra bottom padding (no fixed nav on desktop) */
-  .add-transaction .page-content { padding-bottom: var(--sp-6); }
+  /* Add transaction: constrained width, natural flow (no flex-grow push) */
+  .add-transaction .page-content {
+    flex: 0 0 auto;
+    padding-bottom: var(--sp-4);
+    max-width: 660px;
+  }
 
   /* Form sticky footer: back to normal flow on desktop */
   .form-sticky-footer {
@@ -1835,6 +1839,35 @@ html, body {
   }
 
   .form-sticky-footer .button { box-shadow: none; }
+
+  /* Add transaction: polished footer button on desktop */
+  .add-transaction .form-sticky-footer {
+    max-width: 660px;
+    margin: 0 auto;
+    width: 100%;
+    padding: var(--sp-4) var(--sp-6) var(--sp-8);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .add-transaction .form-sticky-footer .button-large {
+    width: auto;
+    padding: var(--sp-3) var(--sp-8);
+    border-radius: var(--r-xl);
+    font-size: var(--text-base);
+  }
+
+  /* Login: polished centering and visual depth on desktop */
+  .login-page {
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--bg) 55%, rgba(244, 114, 182, 0.08) 100%);
+  }
+
+  .login-card {
+    max-width: 460px;
+    padding: var(--sp-10) var(--sp-8);
+    box-shadow: 0 20px 60px rgba(79, 70, 229, 0.12), 0 8px 24px rgba(0, 0, 0, 0.06);
+  }
 
   /* ── Dashboard 2-column layout ── */
   .dashboard-layout {
@@ -1929,6 +1962,8 @@ html, body {
 
 .login-page {
   min-height: 100vh;
+  height: 100%;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
