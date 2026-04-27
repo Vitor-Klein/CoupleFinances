@@ -70,6 +70,8 @@
 
   /* Nav */
   --nav-height: 72px;
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --mobile-nav-space: calc(var(--nav-height) + var(--safe-area-bottom));
 }
 
 /* ================================================
@@ -89,13 +91,18 @@ html, body {
   overflow: hidden;
 }
 
-#root { height: 100vh; display: flex; }
+#root {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+}
 
 .app {
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 100vh;
+  height: 100dvh;
   background: var(--bg);
 }
 
@@ -103,7 +110,8 @@ html, body {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-bottom: calc(var(--nav-height) + var(--sp-4));
+  padding-bottom: 0;
+  scroll-padding-bottom: calc(var(--mobile-nav-space) + var(--sp-4));
   display: flex;
   flex-direction: column;
 }
@@ -120,7 +128,7 @@ html, body {
 
 .page-content {
   flex: 1;
-  padding: var(--sp-4);
+  padding: var(--sp-4) var(--sp-4) calc(var(--mobile-nav-space) + var(--sp-4));
   max-width: 680px;
   margin: 0 auto;
   width: 100%;
@@ -210,8 +218,8 @@ html, body {
   right: 0;
   z-index: 1000;
   box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
-  height: var(--nav-height);
-  padding: 0 var(--sp-2);
+  height: var(--mobile-nav-space);
+  padding: 0 var(--sp-2) var(--safe-area-bottom);
 }
 
 .nav-item {
@@ -733,7 +741,7 @@ html, body {
 
 .form-sticky-footer {
   position: fixed;
-  bottom: var(--nav-height);
+  bottom: var(--mobile-nav-space);
   left: 0;
   right: 0;
   padding: var(--sp-3) var(--sp-4);
@@ -747,7 +755,7 @@ html, body {
 
 /* Extra bottom padding so last form field isn't hidden behind sticky button */
 .add-transaction .page-content {
-  padding-bottom: 100px;
+  padding-bottom: calc(var(--mobile-nav-space) + 100px);
 }
 
 /* ================================================
@@ -1653,13 +1661,16 @@ html, body {
     grid-template-columns: 260px 1fr;
     grid-template-areas: "sidebar main";
     height: 100vh;
+    height: 100dvh;
     overflow: hidden;
   }
 
   .app-main {
     grid-area: main;
     padding-bottom: 0;
+    scroll-padding-bottom: 0;
     height: 100vh;
+    height: 100dvh;
     overflow-y: auto;
   }
 
@@ -1668,6 +1679,7 @@ html, body {
     grid-area: sidebar;
     position: static;
     height: 100vh;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
