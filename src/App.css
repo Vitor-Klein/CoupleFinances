@@ -2242,6 +2242,15 @@ html, body {
 }
 
 /* ================================================
+   MOBILE-ONLY OVERRIDES
+   ================================================ */
+
+/* Tendência mensal visível apenas no desktop */
+.dashboard-charts .trend-chart { display: none; }
+.analytics .trend-chart        { display: none; }
+.analytics .chart-controls     { display: none; }
+
+/* ================================================
    RESPONSIVE — SMALL TABLET (640px)
    ================================================ */
 
@@ -2543,6 +2552,9 @@ html, body {
 
   .dashboard-charts { display: flex; flex-direction: column; }
   .dashboard-charts > * { margin-bottom: var(--sp-4); }
+  .dashboard-charts .trend-chart { display: block; }
+  .analytics .trend-chart        { display: block; }
+  .analytics .chart-controls     { display: grid; }
 
   /* ── Analytics ── */
   .stats-grid { grid-template-columns: repeat(4, 1fr); }
