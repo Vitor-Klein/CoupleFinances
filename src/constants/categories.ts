@@ -15,6 +15,7 @@ export const EXPENSE_CATEGORIES: Record<string, string> = {
   education: 'Educação',
   entertainment: 'Entretenimento',
   shopping: 'Compras',
+  savings: 'Poupança',
   other: 'Outros',
 };
 
@@ -35,6 +36,7 @@ export const CATEGORY_COLORS: Record<CategoryType, string> = {
   education: '#a855f7',
   entertainment: '#ec4899',
   shopping: '#14b8a6',
+  savings: '#22c55e',
   other: '#9ca3af',
 };
 
@@ -50,6 +52,7 @@ export const CATEGORY_EMOJIS: Record<CategoryType, string> = {
   education: '📚',
   entertainment: '🎮',
   shopping: '🛍️',
+  savings: '🏦',
   other: '📌',
 };
 

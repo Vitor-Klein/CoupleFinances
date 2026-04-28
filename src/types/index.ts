@@ -2,7 +2,7 @@ export type TransactionType = 'income' | 'expense';
 export type CategoryType =
   | 'salary' | 'freelance' | 'bonus'
   | 'housing' | 'food' | 'transport' | 'utilities' | 'health'
-  | 'education' | 'entertainment' | 'shopping' | 'other';
+  | 'education' | 'entertainment' | 'shopping' | 'savings' | 'other';
 export type RecurrenceType = 'none' | 'monthly' | 'semiannual' | 'annual';
 
 export interface Transaction {
@@ -58,6 +58,7 @@ export interface AppContextType {
   coupleProfile: CoupleProfile;
   updateCoupleProfile: (profile: CoupleProfile) => void;
   addTransaction: (transaction: Omit<Transaction, 'id'>) => void;
+  addInstallmentTransactions: (transaction: Omit<Transaction, 'id'>, installments: number) => void;
   deleteTransaction: (id: string) => void;
   deleteRecurringGroup: (recurrenceGroupId: string, fromDate: string) => void;
   editTransaction: (id: string, updates: Partial<Transaction>) => void;

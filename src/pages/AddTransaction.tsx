@@ -3,10 +3,12 @@ import { useFinances } from '../context/FinancesContext';
 import { INCOME_CATEGORIES, EXPENSE_CATEGORIES, RECURRENCE_LABELS } from '../constants/categories';
 import { toISODate } from '../utils/formatters';
 import type { TransactionType, CategoryType, RecurrenceType } from '../types';
-import { CheckCircle, RefreshCw } from 'lucide-react';
+import { CheckCircle, RefreshCw, CreditCard } from 'lucide-react';
+
+const INSTALLMENT_OPTIONS = [2, 3, 4, 6, 10, 12];
 
 export const AddTransaction: React.FC = () => {
-  const { addTransaction, coupleProfile } = useFinances();
+  const { addTransaction, addInstallmentTransactions, coupleProfile } = useFinances();
   const today = new Date();
 
   const [type, setType] = useState<TransactionType>('expense');
@@ -17,6 +19,7 @@ export const AddTransaction: React.FC = () => {
   const [person, setPerson] = useState<'me' | 'partner'>('me');
   const [notes, setNotes] = useState('');
   const [recurrence, setRecurrence] = useState<RecurrenceType>('none');
+  const [installments, setInstallments] = useState(1);
   const [submitted, setSubmitted] = useState(false);
 
   const categories = type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
@@ -25,7 +28,21 @@ export const AddTransaction: React.FC = () => {
     setType(newType);
     setCategory(newType === 'income' ? 'salary' : 'food');
     setRecurrence('none');
+    setInstallments(1);
   };
+
+  const handleRecurrenceChange = (opt: RecurrenceType) => {
+    setRecurrence(opt);
+    if (opt !== 'none') setInstallments(1);
+  };
+
+  const handleInstallmentsChange = (n: number) => {
+    setInstallments(n);
+    if (n > 1) setRecurrence('none');
+  };
+
+  const installmentValue =
+    installments > 1 && amount ? Math.round((parseFloat(amount) / installments) * 100) / 100 : null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +51,7 @@ export const AddTransaction: React.FC = () => {
       return;
     }
 
-    addTransaction({
+    const base = {
       description: description.trim(),
       amount: parseFloat(amount),
       type,
@@ -42,8 +59,14 @@ export const AddTransaction: React.FC = () => {
       date,
       person,
       notes: notes.trim() || undefined,
-      recurrence,
-    });
+      recurrence: 'none' as RecurrenceType,
+    };
+
+    if (installments > 1) {
+      addInstallmentTransactions(base, installments);
+    } else {
+      addTransaction({ ...base, recurrence });
+    }
 
     setSubmitted(true);
     setTimeout(() => {
@@ -53,6 +76,7 @@ export const AddTransaction: React.FC = () => {
       setDate(toISODate(new Date()));
       setNotes('');
       setRecurrence('none');
+      setInstallments(1);
       setSubmitted(false);
     }, 1800);
   };
@@ -73,9 +97,11 @@ export const AddTransaction: React.FC = () => {
             </div>
             <h3>Transação adicionada!</h3>
             <p>
-              {recurrence !== 'none'
-                ? `Entradas ${RECURRENCE_LABELS[recurrence].toLowerCase()}s criadas automaticamente`
-                : 'Tudo certo por aqui'}
+              {installments > 1
+                ? `${installments} parcelas criadas automaticamente`
+                : recurrence !== 'none'
+                  ? `Entradas ${RECURRENCE_LABELS[recurrence].toLowerCase()}s criadas automaticamente`
+                  : 'Tudo certo por aqui'}
             </p>
           </div>
         ) : (
@@ -119,7 +145,7 @@ export const AddTransaction: React.FC = () => {
             {/* Valor */}
             <div className="form-group">
               <label htmlFor="amount" className="form-label">
-                Valor (R$) *
+                {installments > 1 ? `Valor total (R$) *` : 'Valor (R$) *'}
               </label>
               <input
                 id="amount"
@@ -131,6 +157,11 @@ export const AddTransaction: React.FC = () => {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
               />
+              {installmentValue !== null && (
+                <p className="installment-hint">
+                  {installments}x de R$ {installmentValue.toFixed(2).replace('.', ',')}
+                </p>
+              )}
             </div>
 
             {/* Categoria */}
@@ -152,37 +183,68 @@ export const AddTransaction: React.FC = () => {
               </select>
             </div>
 
-            {/* Recorrência */}
-            <div className="form-group">
-              <label className="form-label">
-                <RefreshCw size={14} />
-                Repetição
-              </label>
-              <div className="recurrence-selector">
-                {recurrenceOptions.map((opt) => (
+            {/* Parcelamento */}
+            {type === 'expense' && (
+              <div className="form-group">
+                <label className="form-label">
+                  <CreditCard size={14} />
+                  Parcelado
+                </label>
+                <div className="installment-selector">
                   <button
-                    key={opt}
                     type="button"
-                    className={`recurrence-button ${recurrence === opt ? 'active' : ''}`}
-                    onClick={() => setRecurrence(opt)}
+                    className={`installment-button ${installments === 1 ? 'active' : ''}`}
+                    onClick={() => handleInstallmentsChange(1)}
                   >
-                    {RECURRENCE_LABELS[opt]}
+                    À vista
                   </button>
-                ))}
+                  {INSTALLMENT_OPTIONS.map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      className={`installment-button ${installments === n ? 'active' : ''}`}
+                      onClick={() => handleInstallmentsChange(n)}
+                    >
+                      {n}x
+                    </button>
+                  ))}
+                </div>
               </div>
-              {recurrence !== 'none' && (
-                <p className="recurrence-hint">
-                  {recurrence === 'monthly' && 'Lançamentos automáticos nos próximos 24 meses.'}
-                  {recurrence === 'semiannual' && 'Lançamentos a cada 6 meses nos próximos 2,5 anos.'}
-                  {recurrence === 'annual' && 'Lançamentos anuais nos próximos 4 anos.'}
-                </p>
-              )}
-            </div>
+            )}
+
+            {/* Recorrência — desabilitada quando parcelado */}
+            {installments === 1 && (
+              <div className="form-group">
+                <label className="form-label">
+                  <RefreshCw size={14} />
+                  Repetição
+                </label>
+                <div className="recurrence-selector">
+                  {recurrenceOptions.map((opt) => (
+                    <button
+                      key={opt}
+                      type="button"
+                      className={`recurrence-button ${recurrence === opt ? 'active' : ''}`}
+                      onClick={() => handleRecurrenceChange(opt)}
+                    >
+                      {RECURRENCE_LABELS[opt]}
+                    </button>
+                  ))}
+                </div>
+                {recurrence !== 'none' && (
+                  <p className="recurrence-hint">
+                    {recurrence === 'monthly' && 'Lançamentos automáticos nos próximos 24 meses.'}
+                    {recurrence === 'semiannual' && 'Lançamentos a cada 6 meses nos próximos 2,5 anos.'}
+                    {recurrence === 'annual' && 'Lançamentos anuais nos próximos 4 anos.'}
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Data */}
             <div className="form-group">
               <label htmlFor="date" className="form-label">
-                Data *
+                {installments > 1 ? 'Data da 1ª parcela *' : 'Data *'}
               </label>
               <input
                 id="date"

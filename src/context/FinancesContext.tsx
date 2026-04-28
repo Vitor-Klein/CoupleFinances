@@ -126,6 +126,27 @@ export const FinancesProvider: React.FC<{ children: ReactNode }> = ({ children }
     [user],
   );
 
+  const addInstallmentTransactions = useCallback(
+    (transaction: Omit<Transaction, 'id'>, installments: number) => {
+      if (!user) return;
+      const groupId = generateId();
+      const installmentAmount = Math.round((transaction.amount / installments) * 100) / 100;
+      const entries: Transaction[] = Array.from({ length: installments }, (_, i) => ({
+        ...transaction,
+        id: generateId(),
+        amount: installmentAmount,
+        description: `${transaction.description} (${i + 1}/${installments})`,
+        date: addMonthsToDate(transaction.date, i),
+        recurrenceGroupId: groupId,
+      }));
+      setTransactions((prev) => [...prev, ...entries]);
+      StorageService.insertTransactions(user.id, entries).catch((err) =>
+        console.error('Erro ao salvar parcelas:', err),
+      );
+    },
+    [user],
+  );
+
   const deleteTransaction = useCallback(
     (id: string) => {
       if (!user) return;
@@ -307,6 +328,7 @@ export const FinancesProvider: React.FC<{ children: ReactNode }> = ({ children }
     coupleProfile,
     updateCoupleProfile,
     addTransaction,
+    addInstallmentTransactions,
     deleteTransaction,
     deleteRecurringGroup,
     editTransaction,
