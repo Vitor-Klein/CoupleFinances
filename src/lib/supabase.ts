@@ -26,7 +26,9 @@ export type DbCoupleProfile = {
   user_id: string;
   person1_name: string;
   person1_salary: number;
+  person1_reserve: number;
   person2_name: string;
   person2_salary: number;
+  person2_reserve: number;
   updated_at: string;
 };

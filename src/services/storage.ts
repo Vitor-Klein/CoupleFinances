@@ -4,8 +4,10 @@ import type { Transaction, CoupleProfile, TransactionType, CategoryType, Recurre
 const DEFAULT_PROFILE: CoupleProfile = {
   person1Name: 'Eu',
   person1Salary: 0,
+  person1Reserve: 0,
   person2Name: 'Parceiro(a)',
   person2Salary: 0,
+  person2Reserve: 0,
 };
 
 function txFromDb(row: DbTransaction): Transaction {
@@ -45,8 +47,10 @@ function profileFromDb(row: DbCoupleProfile): CoupleProfile {
   return {
     person1Name: row.person1_name,
     person1Salary: Number(row.person1_salary),
+    person1Reserve: Number(row.person1_reserve ?? 0),
     person2Name: row.person2_name,
     person2Salary: Number(row.person2_salary),
+    person2Reserve: Number(row.person2_reserve ?? 0),
   };
 }
 
@@ -138,8 +142,10 @@ export const StorageService = {
         user_id: userId,
         person1_name: profile.person1Name,
         person1_salary: profile.person1Salary,
+        person1_reserve: profile.person1Reserve,
         person2_name: profile.person2Name,
         person2_salary: profile.person2Salary,
+        person2_reserve: profile.person2Reserve,
         updated_at: new Date().toISOString(),
       },
       { onConflict: 'user_id' },

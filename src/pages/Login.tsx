@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { Heart, Mail, Lock, LogIn, UserPlus } from 'lucide-react';
+import { Heart, Mail, Lock, LogIn, UserPlus, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 export const Login: React.FC = () => {
   const { signIn, signUp } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === 'dark';
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -52,6 +55,14 @@ export const Login: React.FC = () => {
 
   return (
     <div className="login-page">
+      <button
+        type="button"
+        className="theme-toggle-compact login-theme-toggle"
+        onClick={toggleTheme}
+        aria-label={isDark ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
+      >
+        {isDark ? <Sun size={18} /> : <Moon size={18} />}
+      </button>
       <div className="login-card">
         <div className="login-brand">
           <Heart size={32} className="login-brand-icon" />

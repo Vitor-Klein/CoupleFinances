@@ -16,6 +16,7 @@ import type {
   TrendPoint,
   PersonStats,
   RecurrenceType,
+  ReserveTotals,
 } from '../types';
 import { StorageService } from '../services/storage';
 import { useAuth } from './AuthContext';
@@ -26,8 +27,10 @@ const FinancesContext = createContext<AppContextType | undefined>(undefined);
 const DEFAULT_PROFILE: CoupleProfile = {
   person1Name: 'Eu',
   person1Salary: 0,
+  person1Reserve: 0,
   person2Name: 'Parceiro(a)',
   person2Salary: 0,
+  person2Reserve: 0,
 };
 
 function addMonthsToDate(dateStr: string, months: number): string {
@@ -314,6 +317,20 @@ export const FinancesProvider: React.FC<{ children: ReactNode }> = ({ children }
     [transactions],
   );
 
+  const getReserveTotals = useCallback((): ReserveTotals => {
+    let person1 = coupleProfile.person1Reserve;
+    let person2 = coupleProfile.person2Reserve;
+
+    for (const t of transactions) {
+      if (t.category !== 'savings') continue;
+      const delta = t.amount;
+      if (t.person === 'me') person1 += delta;
+      else person2 += delta;
+    }
+
+    return { person1, person2, total: person1 + person2 };
+  }, [transactions, coupleProfile.person1Reserve, coupleProfile.person2Reserve]);
+
   if (!isLoaded) {
     return (
       <div className="app-loading">
@@ -339,6 +356,7 @@ export const FinancesProvider: React.FC<{ children: ReactNode }> = ({ children }
     getMonthlyTrend,
     getPersonStats,
     isRecurringSalary,
+    getReserveTotals,
   };
 
   return <FinancesContext.Provider value={value}>{children}</FinancesContext.Provider>;

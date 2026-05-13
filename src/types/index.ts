@@ -23,8 +23,16 @@ export interface Transaction {
 export interface CoupleProfile {
   person1Name: string;
   person1Salary: number;
+  person1Reserve: number;
   person2Name: string;
   person2Salary: number;
+  person2Reserve: number;
+}
+
+export interface ReserveTotals {
+  person1: number;
+  person2: number;
+  total: number;
 }
 
 export interface MonthlyBalance {
@@ -69,4 +77,5 @@ export interface AppContextType {
   getMonthlyTrend: (months: number) => TrendPoint[];
   getPersonStats: (year: number, month: number, person: 'me' | 'partner') => PersonStats;
   isRecurringSalary: (id: string) => boolean;
+  getReserveTotals: () => ReserveTotals;
 }

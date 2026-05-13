@@ -1,6 +1,17 @@
 import React, { useState } from 'react';
-import { User, DollarSign, Edit3, Check, Heart, TrendingUp } from 'lucide-react';
+import {
+  User,
+  DollarSign,
+  Edit3,
+  Check,
+  Heart,
+  TrendingUp,
+  Moon,
+  Sun,
+  PiggyBank,
+} from 'lucide-react';
 import { useFinances } from '../context/FinancesContext';
+import { useTheme } from '../context/ThemeContext';
 import { formatCurrency } from '../utils/formatters';
 
 function getInitials(name: string): string {
@@ -13,12 +24,15 @@ function getInitials(name: string): string {
 }
 
 export const Profile: React.FC = () => {
-  const { coupleProfile, updateCoupleProfile } = useFinances();
+  const { coupleProfile, updateCoupleProfile, getReserveTotals } = useFinances();
+  const { theme, toggleTheme } = useTheme();
   const [editing, setEditing] = useState(false);
   const [saved, setSaved] = useState(false);
   const [form, setForm] = useState({ ...coupleProfile });
+  const isDark = theme === 'dark';
 
   const totalSalary = coupleProfile.person1Salary + coupleProfile.person2Salary;
+  const reserves = getReserveTotals();
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,6 +44,8 @@ export const Profile: React.FC = () => {
       ...form,
       person1Salary: Math.max(0, form.person1Salary),
       person2Salary: Math.max(0, form.person2Salary),
+      person1Reserve: Math.max(0, form.person1Reserve),
+      person2Reserve: Math.max(0, form.person2Reserve),
     });
     setEditing(false);
     setSaved(true);
@@ -108,6 +124,29 @@ export const Profile: React.FC = () => {
               </div>
             </div>
 
+            {/* Reserve / Poupança */}
+            <div className="profile-reserve-card">
+              <div className="profile-reserve-header">
+                <PiggyBank size={20} />
+                <span>Reserva acumulada</span>
+              </div>
+              <div className="profile-reserve-total">{formatCurrency(reserves.total)}</div>
+              <div className="profile-reserve-split">
+                <div className="profile-reserve-person person1">
+                  <span className="profile-reserve-name">{coupleProfile.person1Name}</span>
+                  <span className="profile-reserve-value">{formatCurrency(reserves.person1)}</span>
+                </div>
+                <div className="profile-reserve-person person2">
+                  <span className="profile-reserve-name">{coupleProfile.person2Name}</span>
+                  <span className="profile-reserve-value">{formatCurrency(reserves.person2)}</span>
+                </div>
+              </div>
+              <p className="profile-reserve-hint">
+                Toda transação com categoria <strong>Poupança</strong> é somada à reserva da pessoa
+                correspondente.
+              </p>
+            </div>
+
             {/* Combined Income */}
             {totalSalary > 0 && (
               <div className="profile-combined-income">
@@ -149,6 +188,32 @@ export const Profile: React.FC = () => {
                 as telas, sem precisar lançar manualmente.
               </p>
             </div>
+
+            {/* Theme toggle */}
+            <button
+              type="button"
+              className="theme-toggle"
+              onClick={toggleTheme}
+              aria-pressed={isDark ? 'true' : 'false'}
+              aria-label="Alternar tema escuro"
+            >
+              <span className="theme-toggle-icon">
+                {isDark ? <Moon size={18} /> : <Sun size={18} />}
+              </span>
+              <span className="theme-toggle-text">
+                <span className="theme-toggle-label">
+                  {isDark ? 'Modo escuro' : 'Modo claro'}
+                </span>
+                <span className="theme-toggle-hint">
+                  {isDark
+                    ? 'Toque para voltar ao tema claro'
+                    : 'Toque para ativar o tema escuro'}
+                </span>
+              </span>
+              <span className="theme-switch" aria-hidden="true">
+                <span className="theme-switch-thumb" />
+              </span>
+            </button>
 
             <button className="button button-primary button-large" onClick={() => setEditing(true)}>
               <Edit3 size={18} />
@@ -197,6 +262,27 @@ export const Profile: React.FC = () => {
                   }
                 />
               </div>
+
+              <div className="form-group">
+                <label className="form-label">
+                  <PiggyBank size={15} />
+                  Reserva inicial (R$)
+                </label>
+                <input
+                  type="number"
+                  className="form-input"
+                  placeholder="0,00"
+                  step="0.01"
+                  min="0"
+                  value={form.person1Reserve || ''}
+                  onChange={(e) =>
+                    setForm({ ...form, person1Reserve: parseFloat(e.target.value) || 0 })
+                  }
+                />
+                <p className="form-hint">
+                  Valor base — lançamentos de Poupança são somados a este saldo.
+                </p>
+              </div>
             </div>
 
             <div className="profile-edit-divider">
@@ -242,6 +328,27 @@ export const Profile: React.FC = () => {
                     setForm({ ...form, person2Salary: parseFloat(e.target.value) || 0 })
                   }
                 />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">
+                  <PiggyBank size={15} />
+                  Reserva inicial (R$)
+                </label>
+                <input
+                  type="number"
+                  className="form-input"
+                  placeholder="0,00"
+                  step="0.01"
+                  min="0"
+                  value={form.person2Reserve || ''}
+                  onChange={(e) =>
+                    setForm({ ...form, person2Reserve: parseFloat(e.target.value) || 0 })
+                  }
+                />
+                <p className="form-hint">
+                  Valor base — lançamentos de Poupança são somados a este saldo.
+                </p>
               </div>
             </div>
 

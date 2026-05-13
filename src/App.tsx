@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { FinancesProvider } from './context/FinancesContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { Navigation } from './components';
 import { Dashboard, AddTransaction, Transactions, Analytics, Profile, Login } from './pages';
 import './App.css';
@@ -55,9 +56,11 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
