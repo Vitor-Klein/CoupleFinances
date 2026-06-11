@@ -1,34 +1,37 @@
 import React, { useState } from "react";
 import { useFinances } from "../context/FinancesContext";
-import {
-  INCOME_CATEGORIES,
-  EXPENSE_CATEGORIES,
-  RECURRENCE_LABELS,
-  CATEGORY_EMOJIS,
-} from "../constants/categories";
-import { toISODate } from "../utils/formatters";
-import type { TransactionType, CategoryType, RecurrenceType } from "../types";
+import { useCouple } from "../context/CoupleContext";
+import { useToast } from "../context/ToastContext";
+import { useCategories } from "../hooks/useCategories";
+import { RECURRENCE_LABELS } from "../constants/categories";
+import { toISODate, formatCurrency } from "../utils/formatters";
+import { validateTransaction } from "../utils/validation";
+import { CurrencyInput } from "../components/CurrencyInput";
+import type { TransactionType, CategoryType, RecurrenceType, PersonKey } from "../types";
 import { CheckCircle, RefreshCw, CreditCard } from "lucide-react";
 
 const INSTALLMENT_OPTIONS = [2, 3, 4, 6, 10, 12];
 
 export const AddTransaction: React.FC = () => {
-  const { addTransaction, addInstallmentTransactions, coupleProfile } =
-    useFinances();
+  const { addTransaction, addInstallmentTransactions, coupleProfile } = useFinances();
+  const { myPerson } = useCouple();
+  const toast = useToast();
+  const categories = useCategories();
   const today = new Date();
 
   const [type, setType] = useState<TransactionType>("expense");
   const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState("");
+  const [amount, setAmount] = useState(0);
   const [category, setCategory] = useState<CategoryType>("food");
   const [date, setDate] = useState(toISODate(today));
-  const [person, setPerson] = useState<"me" | "partner">("me");
+  const [person, setPerson] = useState<PersonKey>(myPerson);
   const [notes, setNotes] = useState("");
   const [recurrence, setRecurrence] = useState<RecurrenceType>("none");
   const [installments, setInstallments] = useState(1);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const categories = type === "income" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+  const options = categories.optionsFor(type);
 
   const handleTypeChange = (newType: TransactionType) => {
     setType(newType);
@@ -48,20 +51,23 @@ export const AddTransaction: React.FC = () => {
   };
 
   const installmentValue =
-    installments > 1 && amount
-      ? Math.round((parseFloat(amount) / installments) * 100) / 100
+    installments > 1 && amount > 0
+      ? Math.round((amount / installments) * 100) / 100
       : null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!description.trim() || !amount) {
-      alert("Por favor, preencha todos os campos obrigatórios");
+    const validationError = validateTransaction({ description, amount, date, notes });
+    if (validationError) {
+      setError(validationError);
+      toast.error(validationError);
       return;
     }
+    setError(null);
 
     const base = {
       description: description.trim(),
-      amount: parseFloat(amount),
+      amount,
       type,
       category,
       date,
@@ -79,14 +85,14 @@ export const AddTransaction: React.FC = () => {
     setSubmitted(true);
     setTimeout(() => {
       setDescription("");
-      setAmount("");
+      setAmount(0);
       setCategory(type === "income" ? "salary" : "food");
       setDate(toISODate(new Date()));
       setNotes("");
       setRecurrence("none");
       setInstallments(1);
       setSubmitted(false);
-    }, 1800);
+    }, 1500);
   };
 
   const recurrenceOptions: RecurrenceType[] = [
@@ -154,6 +160,7 @@ export const AddTransaction: React.FC = () => {
                 type="text"
                 className="form-input"
                 placeholder="Ex: Netflix, Mercado, Aluguel…"
+                maxLength={120}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
@@ -162,22 +169,12 @@ export const AddTransaction: React.FC = () => {
             {/* Valor */}
             <div className="form-group">
               <label htmlFor="amount" className="form-label">
-                {installments > 1 ? `Valor total (R$) *` : "Valor (R$) *"}
+                {installments > 1 ? `Valor total *` : "Valor *"}
               </label>
-              <input
-                id="amount"
-                type="number"
-                className="form-input"
-                placeholder="0,00"
-                step="0.01"
-                min="0"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-              />
+              <CurrencyInput id="amount" value={amount} onChange={setAmount} />
               {installmentValue !== null && (
                 <p className="installment-hint">
-                  {installments}x de R${" "}
-                  {installmentValue.toFixed(2).replace(".", ",")}
+                  {installments}x de {formatCurrency(installmentValue)}
                 </p>
               )}
             </div>
@@ -186,27 +183,28 @@ export const AddTransaction: React.FC = () => {
             <div className="form-group">
               <label className="form-label">Categoria *</label>
               <div className="category-selector">
-                {Object.entries(categories).map(([key, label]) => {
-                  const catKey = key as CategoryType;
-                  const emoji = CATEGORY_EMOJIS[catKey];
-                  const isActive = category === catKey;
-                  const pressed: "true" | "false" = isActive ? "true" : "false";
+                {options.map((opt) => {
+                  const isActive = category === opt.key;
                   return (
                     <button
-                      key={key}
+                      key={opt.key}
                       type="button"
-                      className={`category-chip category-chip-${catKey} ${isActive ? "active" : ""}`}
-                      onClick={() => setCategory(catKey)}
-                      aria-pressed={pressed}
+                      className={`category-chip ${isActive ? "active" : ""}`}
+                      style={{ "--cat-color": opt.color } as React.CSSProperties}
+                      onClick={() => setCategory(opt.key)}
+                      aria-pressed={isActive}
                     >
                       <span className="category-chip-emoji" aria-hidden="true">
-                        {emoji}
+                        {opt.emoji}
                       </span>
-                      <span className="category-chip-label">{label}</span>
+                      <span className="category-chip-label">{opt.label}</span>
                     </button>
                   );
                 })}
               </div>
+              <p className="form-hint">
+                Crie categorias personalizadas na aba <strong>Perfil</strong>.
+              </p>
             </div>
 
             {/* Parcelamento */}
@@ -259,12 +257,8 @@ export const AddTransaction: React.FC = () => {
                 </div>
                 {recurrence !== "none" && (
                   <p className="recurrence-hint">
-                    {recurrence === "monthly" &&
-                      "Lançamentos automáticos nos próximos 24 meses."}
-                    {recurrence === "semiannual" &&
-                      "Lançamentos a cada 6 meses nos próximos 2,5 anos."}
-                    {recurrence === "annual" &&
-                      "Lançamentos anuais nos próximos 4 anos."}
+                    Os lançamentos são criados automaticamente e a série continua
+                    para sempre — você pode encerrá-la quando quiser no Extrato.
                   </p>
                 )}
               </div>
@@ -290,15 +284,15 @@ export const AddTransaction: React.FC = () => {
               <div className="person-selector">
                 <button
                   type="button"
-                  className={`person-button ${person === "me" ? "active" : ""}`}
-                  onClick={() => setPerson("me")}
+                  className={`person-button ${person === "person1" ? "active" : ""}`}
+                  onClick={() => setPerson("person1")}
                 >
                   {coupleProfile.person1Name}
                 </button>
                 <button
                   type="button"
-                  className={`person-button ${person === "partner" ? "active" : ""}`}
-                  onClick={() => setPerson("partner")}
+                  className={`person-button ${person === "person2" ? "active" : ""}`}
+                  onClick={() => setPerson("person2")}
                 >
                   {coupleProfile.person2Name}
                 </button>
@@ -314,11 +308,14 @@ export const AddTransaction: React.FC = () => {
                 id="notes"
                 className="form-textarea"
                 placeholder="Observações sobre esta transação…"
+                maxLength={500}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
               />
             </div>
+
+            {error && <p className="form-error" role="alert">{error}</p>}
           </form>
         )}
       </div>

@@ -12,6 +12,9 @@ export const formatCurrency = (value: number): string => {
   }).format(value);
 };
 
+/** Valor mascarado para o modo privacidade */
+export const HIDDEN_CURRENCY = 'R$ ••••';
+
 /**
  * Formata data em formato legível
  */
@@ -25,17 +28,39 @@ export const formatDate = (dateString: string): string => {
 };
 
 /**
- * Formata data no formato ISO (YYYY-MM-DD)
+ * Rótulo amigável de dia: "Hoje", "Ontem" ou "terça, 9 de junho"
  */
-export const toISODate = (date: Date): string => {
-  return date.toISOString().split('T')[0];
+export const formatDayLabel = (dateString: string): string => {
+  const date = new Date(dateString + 'T00:00:00');
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const diffDays = Math.round((today.getTime() - date.getTime()) / 86400000);
+  if (diffDays === 0) return 'Hoje';
+  if (diffDays === 1) return 'Ontem';
+  if (diffDays === -1) return 'Amanhã';
+  const label = new Intl.DateTimeFormat('pt-BR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }).format(date);
+  return label.charAt(0).toUpperCase() + label.slice(1);
 };
 
 /**
- * Gera ID único
+ * Formata data no formato ISO (YYYY-MM-DD) usando o fuso local
+ */
+export const toISODate = (date: Date): string => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
+/**
+ * Gera ID único e imprevisível (UUID v4)
  */
 export const generateId = (): string => {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  return crypto.randomUUID();
 };
 
 /**

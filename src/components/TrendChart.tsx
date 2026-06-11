@@ -29,6 +29,34 @@ interface TrendChartProps {
   type?: "line" | "bar";
 }
 
+interface TooltipEntry {
+  name: string;
+  value: number;
+  color: string;
+  payload: TrendData;
+}
+
+interface TooltipProps {
+  active?: boolean;
+  payload?: TooltipEntry[];
+}
+
+const CustomTooltip = ({ active, payload }: TooltipProps) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="chart-tooltip">
+        <p className="label">{payload[0].payload.month}</p>
+        {payload.map((entry, index) => (
+          <p key={index} style={{ color: entry.color }}>
+            {entry.name}: {formatCurrency(entry.value)}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
+
 export const TrendChart: React.FC<TrendChartProps> = ({
   data,
   type = "line",
@@ -40,22 +68,6 @@ export const TrendChart: React.FC<TrendChartProps> = ({
       </div>
     );
   }
-
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="chart-tooltip">
-          <p className="label">{payload[0].payload.month}</p>
-          {payload.map((entry: any, index: number) => (
-            <p key={index} style={{ color: entry.color }}>
-              {entry.name}: {formatCurrency(entry.value)}
-            </p>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
 
   return (
     <div className="trend-chart">

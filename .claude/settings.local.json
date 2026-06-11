@@ -4,7 +4,13 @@
       "Bash(npm run *)",
       "Bash(npm install *)",
       "Bash(npx tsc *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(npm audit *)",
+      "Bash(python -c \"import struct; f=open\\('public/favicon.png','rb'\\); d=f.read\\(33\\); print\\(struct.unpack\\('>II', d[16:24]\\)\\)\")",
+      "Bash(powershell -c 'Add-Type -AssemblyName System.Drawing; $i=[System.Drawing.Image]::FromFile\\('\\\\''public/favicon.png'\\\\''\\); $i.Width; $i.Height')",
+      "Bash(python *)",
+      "Bash(npx eslint *)",
+      "Bash(grep -n \"^a \\\\|^a,\\\\|a {\" src/App.css)"
     ]
   }
 }

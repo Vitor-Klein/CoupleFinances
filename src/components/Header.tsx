@@ -1,6 +1,7 @@
 import React from 'react';
-import { Heart } from 'lucide-react';
+import { Heart, Eye, EyeOff } from 'lucide-react';
 import { useFinances } from '../context/FinancesContext';
+import { usePrivacy } from '../context/PrivacyContext';
 
 interface HeaderProps {
   title: string;
@@ -8,6 +9,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ title }) => {
   const { coupleProfile } = useFinances();
+  const { hideValues, toggleHideValues } = usePrivacy();
 
   const p1 = coupleProfile.person1Name;
   const p2 = coupleProfile.person2Name;
@@ -27,7 +29,19 @@ export const Header: React.FC<HeaderProps> = ({ title }) => {
             <span className="header-person">{p2}</span>
           </div>
         )}
-        <h2 className="header-title">{title}</h2>
+        <div className="header-title-row">
+          <h2 className="header-title">{title}</h2>
+          <button
+            type="button"
+            className="privacy-toggle"
+            onClick={toggleHideValues}
+            aria-pressed={hideValues}
+            aria-label={hideValues ? 'Mostrar valores' : 'Ocultar valores'}
+            title={hideValues ? 'Mostrar valores' : 'Ocultar valores'}
+          >
+            {hideValues ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
       </div>
     </header>
   );

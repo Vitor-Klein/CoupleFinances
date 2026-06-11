@@ -1,6 +1,8 @@
 import React from 'react';
-import { formatCurrency } from '../utils/formatters';
 import { ArrowUp, ArrowDown, Wallet } from 'lucide-react';
+import { usePrivacy } from '../context/PrivacyContext';
+import { useCountUp } from '../hooks/useCountUp';
+import { formatCurrency, HIDDEN_CURRENCY } from '../utils/formatters';
 
 interface BalanceCardProps {
   title: string;
@@ -17,7 +19,10 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({
   balance,
   variant = 'default',
 }) => {
+  const { money, hideValues } = usePrivacy();
+  const animatedBalance = useCountUp(balance);
   const isPositive = balance >= 0;
+  const balanceText = hideValues ? HIDDEN_CURRENCY : formatCurrency(animatedBalance);
 
   if (variant === 'compact') {
     return (
@@ -26,15 +31,15 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({
         <div className="balance-compact-values">
           <div className="balance-compact-row">
             <ArrowUp size={12} className="icon-income" />
-            <span>{formatCurrency(income)}</span>
+            <span>{money(income)}</span>
           </div>
           <div className="balance-compact-row">
             <ArrowDown size={12} className="icon-expense" />
-            <span>{formatCurrency(expenses)}</span>
+            <span>{money(expenses)}</span>
           </div>
         </div>
         <div className={`balance-compact-total ${isPositive ? 'positive' : 'negative'}`}>
-          {formatCurrency(balance)}
+          {balanceText}
         </div>
       </div>
     );
@@ -55,7 +60,7 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({
           </div>
           <div>
             <div className="value-label">Receitas</div>
-            <div className="value-amount">{formatCurrency(income)}</div>
+            <div className="value-amount">{money(income)}</div>
           </div>
         </div>
         <div className="value-item expense">
@@ -64,13 +69,13 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({
           </div>
           <div>
             <div className="value-label">Despesas</div>
-            <div className="value-amount">{formatCurrency(expenses)}</div>
+            <div className="value-amount">{money(expenses)}</div>
           </div>
         </div>
       </div>
       <div className={`balance-total ${isPositive ? 'positive' : 'negative'}`}>
         <span>Saldo do mês</span>
-        <strong>{formatCurrency(balance)}</strong>
+        <strong>{balanceText}</strong>
       </div>
     </div>
   );

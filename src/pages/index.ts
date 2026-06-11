@@ -2,5 +2,8 @@ export { Dashboard } from './Dashboard';
 export { AddTransaction } from './AddTransaction';
 export { Transactions } from './Transactions';
 export { Analytics } from './Analytics';
+export { Planning } from './Planning';
 export { Profile } from './Profile';
 export { Login } from './Login';
+export { Onboarding } from './Onboarding';
+export { ResetPassword } from './ResetPassword';

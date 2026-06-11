@@ -12,20 +12,39 @@ import {
   Tooltip,
 } from "recharts";
 import type { CategorySummary } from "../types";
-import { CATEGORY_COLORS, ALL_CATEGORIES } from "../constants/categories";
+import { useCategories } from "../hooks/useCategories";
 import { formatCurrency } from "../utils/formatters";
 
 interface ChartEntry {
   name: string;
   value: number;
-  categoryKey: string;
+  color: string;
 }
 
 interface CategoryChartProps {
   data: CategorySummary[];
 }
 
+interface TooltipProps {
+  active?: boolean;
+  payload?: { name: string; value: number }[];
+}
+
+const CustomTooltip = ({ active, payload }: TooltipProps) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="chart-tooltip">
+        <p className="label">{payload[0].name}</p>
+        <p className="value">{formatCurrency(payload[0].value)}</p>
+      </div>
+    );
+  }
+  return null;
+};
+
 export const CategoryChart: React.FC<CategoryChartProps> = ({ data }) => {
+  const categories = useCategories();
+
   if (data.length === 0) {
     return (
       <div className="chart-empty">
@@ -35,22 +54,10 @@ export const CategoryChart: React.FC<CategoryChartProps> = ({ data }) => {
   }
 
   const chartData: ChartEntry[] = data.map((item) => ({
-    name: ALL_CATEGORIES[item.category],
+    name: categories.label(item.category),
     value: item.total,
-    categoryKey: item.category,
+    color: categories.color(item.category),
   }));
-
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="chart-tooltip">
-          <p className="label">{payload[0].name}</p>
-          <p className="value">{formatCurrency(payload[0].value)}</p>
-        </div>
-      );
-    }
-    return null;
-  };
 
   return (
     <div className="category-chart">
@@ -67,12 +74,9 @@ export const CategoryChart: React.FC<CategoryChartProps> = ({ data }) => {
             fill="#8884d8"
             dataKey="value"
           >
-            {chartData.map((entry: ChartEntry, index: number) => {
-              const colorKey =
-                entry.categoryKey as keyof typeof CATEGORY_COLORS;
-              const color = (CATEGORY_COLORS[colorKey] as string) || "#9ca3af";
-              return <Cell key={`cell-${index}`} fill={color} />;
-            })}
+            {chartData.map((entry: ChartEntry, index: number) => (
+              <Cell key={`cell-${index}`} fill={entry.color} />
+            ))}
           </Pie>
           <Tooltip content={<CustomTooltip />} />
           <Legend />

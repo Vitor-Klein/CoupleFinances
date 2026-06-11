@@ -1,4 +1,4 @@
-import type { CategoryType, RecurrenceType } from '../types';
+import type { DefaultCategoryType, RecurrenceType } from '../types';
 
 export const INCOME_CATEGORIES: Record<string, string> = {
   salary: 'Salário',
@@ -24,7 +24,7 @@ export const ALL_CATEGORIES: Record<string, string> = {
   ...EXPENSE_CATEGORIES,
 };
 
-export const CATEGORY_COLORS: Record<CategoryType, string> = {
+export const CATEGORY_COLORS: Record<DefaultCategoryType, string> = {
   salary: '#10b981',
   freelance: '#3b82f6',
   bonus: '#8b5cf6',
@@ -40,7 +40,7 @@ export const CATEGORY_COLORS: Record<CategoryType, string> = {
   other: '#9ca3af',
 };
 
-export const CATEGORY_EMOJIS: Record<CategoryType, string> = {
+export const CATEGORY_EMOJIS: Record<DefaultCategoryType, string> = {
   salary: '💰',
   freelance: '💻',
   bonus: '🎁',
@@ -56,6 +56,12 @@ export const CATEGORY_EMOJIS: Record<CategoryType, string> = {
   other: '📌',
 };
 
+/** Cores disponíveis para categorias customizadas */
+export const CUSTOM_CATEGORY_COLORS = [
+  '#6366f1', '#ec4899', '#f97316', '#f59e0b', '#10b981',
+  '#06b6d4', '#3b82f6', '#8b5cf6', '#ef4444', '#14b8a6',
+];
+
 export const RECURRENCE_LABELS: Record<RecurrenceType, string> = {
   none: 'Não repete',
   monthly: 'Mensal',
@@ -69,8 +75,3 @@ export const RECURRENCE_BADGE_COLORS: Record<RecurrenceType, string> = {
   semiannual: '#8b5cf6',
   annual: '#f59e0b',
 };
-
-export const PEOPLE = {
-  me: 'Eu',
-  partner: 'Parceiro(a)',
-} as const;

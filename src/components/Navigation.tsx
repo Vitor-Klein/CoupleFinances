@@ -1,17 +1,15 @@
 import React from 'react';
-import { BarChart3, Plus, List, TrendingUp, Users, Heart } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
+import { BarChart3, Plus, List, TrendingUp, Users, Heart, Target } from 'lucide-react';
 import { useFinances } from '../context/FinancesContext';
-
-interface NavigationProps {
-  active: string;
-  onNavigate: (page: string) => void;
-}
 
 function getInitials(name: string): string {
   return name.split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 2);
 }
 
-export const Navigation: React.FC<NavigationProps> = ({ active, onNavigate }) => {
+const navClass = ({ isActive }: { isActive: boolean }) => `nav-item ${isActive ? 'active' : ''}`;
+
+export const Navigation: React.FC = () => {
   const { coupleProfile } = useFinances();
 
   return (
@@ -39,51 +37,39 @@ export const Navigation: React.FC<NavigationProps> = ({ active, onNavigate }) =>
       </div>
 
       {/* Add button — circular on mobile, full-width on desktop */}
-      <button
-        type="button"
-        className={`nav-item nav-item-add ${active === 'add' ? 'active' : ''}`}
-        onClick={() => onNavigate('add')}
+      <NavLink
+        to="/add"
+        className={({ isActive }) => `nav-item nav-item-add ${isActive ? 'active' : ''}`}
         aria-label="Nova transação"
       >
         <Plus size={24} />
         <span className="nav-add-label">Nova Transação</span>
-      </button>
+      </NavLink>
 
-      <button
-        type="button"
-        className={`nav-item ${active === 'dashboard' ? 'active' : ''}`}
-        onClick={() => onNavigate('dashboard')}
-      >
+      <NavLink to="/" className={navClass} end>
         <BarChart3 size={22} />
         <span>Início</span>
-      </button>
+      </NavLink>
 
-      <button
-        type="button"
-        className={`nav-item ${active === 'transactions' ? 'active' : ''}`}
-        onClick={() => onNavigate('transactions')}
-      >
+      <NavLink to="/transactions" className={navClass}>
         <List size={22} />
         <span>Extrato</span>
-      </button>
+      </NavLink>
 
-      <button
-        type="button"
-        className={`nav-item ${active === 'analytics' ? 'active' : ''}`}
-        onClick={() => onNavigate('analytics')}
-      >
+      <NavLink to="/planning" className={navClass}>
+        <Target size={22} />
+        <span>Planejar</span>
+      </NavLink>
+
+      <NavLink to="/analytics" className={navClass}>
         <TrendingUp size={22} />
         <span>Análises</span>
-      </button>
+      </NavLink>
 
-      <button
-        type="button"
-        className={`nav-item ${active === 'profile' ? 'active' : ''}`}
-        onClick={() => onNavigate('profile')}
-      >
+      <NavLink to="/profile" className={navClass}>
         <Users size={22} />
         <span>Perfil</span>
-      </button>
+      </NavLink>
     </nav>
   );
 };
