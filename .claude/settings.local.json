@@ -10,7 +10,8 @@
       "Bash(powershell -c 'Add-Type -AssemblyName System.Drawing; $i=[System.Drawing.Image]::FromFile\\('\\\\''public/favicon.png'\\\\''\\); $i.Width; $i.Height')",
       "Bash(python *)",
       "Bash(npx eslint *)",
-      "Bash(grep -n \"^a \\\\|^a,\\\\|a {\" src/App.css)"
+      "Bash(grep -n \"^a \\\\|^a,\\\\|a {\" src/App.css)",
+      "PowerShell(npx tsc --noEmit; npx eslint src/components/Modal.tsx)"
     ]
   }
 }

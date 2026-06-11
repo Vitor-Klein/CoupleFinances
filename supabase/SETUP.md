@@ -19,6 +19,10 @@ O que ela faz:
 
 > Observação: as constraints de `transactions` são criadas como `NOT VALID` — valem para dados novos sem travar a migração caso exista alguma linha antiga fora do padrão.
 
+### 1b. Rodar a migração 002 (correção obrigatória)
+
+Rode também `migrations/002_fix_transactions_checks.sql` no SQL Editor. A tabela `transactions` original tinha checks inline (ex.: `person in ('me','partner')`) com os mesmos nomes que a 001 usa — por isso a 001 não os substituiu e **todo insert de transação falhava**. A 002 remove os checks antigos e recria os corretos.
+
 ## 2. Habilitar Realtime (verificação)
 
 Em **Database → Replication → supabase_realtime**, confirme que `transactions`, `couple_profiles`, `budgets`, `goals` e `custom_categories` estão na publicação (a migração já tenta adicionar).

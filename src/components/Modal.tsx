@@ -20,6 +20,13 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
   const contentRef = useRef<HTMLDivElement>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
 
+  // onClose costuma ser uma arrow inline (identidade nova a cada render);
+  // mantê-lo num ref evita reexecutar o efeito do focus trap a cada tecla.
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
+
   useEffect(() => {
     if (!isOpen) return;
 
@@ -33,7 +40,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.stopPropagation();
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (e.key !== 'Tab' || !content) return;
@@ -56,7 +63,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
       document.body.classList.remove('modal-open');
       previousFocus.current?.focus();
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
